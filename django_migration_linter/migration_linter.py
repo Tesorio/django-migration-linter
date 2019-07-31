@@ -19,6 +19,7 @@ import logging
 import os
 import re
 from subprocess import Popen, PIPE
+from StringIO import StringIO
 
 from django.conf import settings
 from django.core.management import call_command
@@ -198,15 +199,17 @@ class MigrationLinter(object):
         logger.info(
             "Calling sqlmigrate command {} {}".format(app_label, migration_name)
         )
-        dev_null = open(os.devnull, "w")
         try:
+            output = StringIO()
             sql_statement = call_command(
                 "sqlmigrate",
                 app_label,
                 migration_name,
                 database=self.database,
-                stdout=dev_null,
+                stdout=output,
             )
+            output.seek(0)
+            sql_statement = output.read()
         except (ValueError, ProgrammingError):
             logger.warning(
                 (

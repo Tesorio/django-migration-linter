@@ -17,6 +17,8 @@ from __future__ import print_function
 import os
 from importlib import import_module
 
+import django
+
 
 def split_path(path):
     decomposed_path = []
@@ -53,7 +55,11 @@ def clean_bytes_to_str(byte_input):
 def get_migration_abspath(app_label, migration_name):
     from django.db.migrations.loader import MigrationLoader
 
-    module_name, _ = MigrationLoader.migrations_module(app_label)
+    if django.VERSION >= (1, 11):
+        module_name, _ = MigrationLoader.migrations_module(app_label)
+    else:
+        module_name = MigrationLoader.migrations_module(app_label)
+
     migration_path = "{}.{}".format(module_name, migration_name)
     migration_module = import_module(migration_path)
 
